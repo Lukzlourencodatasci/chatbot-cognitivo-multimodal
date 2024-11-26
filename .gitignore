@@ -1,4 +1,5 @@
-echo venv/ > .gitignore
-echo *.dll >> .gitignore
-echo *.lib >> .gitignore
-echo *.log >> .gitignore
+venv/ 
+*.dll 
+*.lib 
+*.log 
+arquivos_tamanhos.txt 
