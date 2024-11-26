@@ -1,0 +1,9 @@
+streamlit
+transformers
+torch
+openai
+numpy
+pandas
+diffusers
+torch
+Pillow
