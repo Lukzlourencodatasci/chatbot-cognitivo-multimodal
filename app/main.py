@@ -42,47 +42,49 @@ else:
 import streamlit as st
 from models.translation import translate_text
 from models.summarization import summarize_text
-from models.image_gen import generate_image  # Importa a função de geração de imagens
+from models.image_gen import generate_image
 
 st.title("ChatBot Cognitivo Multimodal")
 
-# Sidebar para funcionalidades
-option = st.sidebar.selectbox("Escolha uma funcionalidade:", 
-                               ["Tradução", "Sumarização", "Criação de Imagens"])
+# Tabs para facilitar a navegação
+tabs = st.tabs(["Tradução", "Sumarização", "Criação de Imagens"])
 
 # Funcionalidade de Tradução
-if option == "Tradução":
-    text = st.text_area("Insira o texto para tradução:")
-    lang = st.selectbox("Idioma de destino:", ["en", "pt"])
-    if st.button("Traduzir"):
-        result = translate_text(text, lang)
-        st.write("Tradução:", result)
+with tabs[0]:
+    st.header("Tradução")
+    text_translation = st.text_area("Insira o texto para tradução:")
+    lang = st.selectbox("Idioma de destino:", ["en", "pt"], key="translation_lang")
+    if st.button("Traduzir", key="translate_button"):
+        with st.spinner("Traduzindo..."):
+            try:
+                result = translate_text(text_translation, lang)
+                st.write("Tradução:", result)
+            except Exception as e:
+                st.error(f"Erro durante a tradução: {e}")
 
 # Funcionalidade de Sumarização
-elif option == "Sumarização":
-    st.title("Aplicação de Sumarização de Texto")
-    text = st.text_area("Insira o texto para sumarização:")
+with tabs[1]:
+    st.header("Sumarização")
+    text_summary = st.text_area("Insira o texto para sumarização:")
+    max_len = st.slider("Comprimento máximo (em caracteres):", 500, 1000, 1000, key="max_len_slider")
+    min_len = st.slider("Comprimento mínimo (em caracteres):", 500, 1000, 500, key="min_len_slider")
 
-    max_len = st.slider("Comprimento máximo (em caracteres):", 500, 1000, 1000)
-    min_len = st.slider("Comprimento mínimo (em caracteres):", 500, 1000, 500)
-
-    if st.button("Resumir"):
-        result = summarize_text(text, max_length=max_len, min_length=min_len)
-        st.write("Resumo:", result)
+    if st.button("Resumir", key="summarize_button"):
+        with st.spinner("Resumindo..."):
+            try:
+                result = summarize_text(text_summary, max_length=max_len, min_length=min_len)
+                st.write("Resumo:", result)
+            except Exception as e:
+                st.error(f"Erro durante a sumarização: {e}")
 
 # Funcionalidade de Criação de Imagens
-elif option == "Criação de Imagens":
-    st.title("Criação de Imagens com IA")
-    description = st.text_input("Digite a descrição da imagem:")
-    
-    if st.button("Gerar Imagem"):
+with tabs[2]:
+    st.header("Criação de Imagens")
+    description = st.text_input("Digite a descrição da imagem (máx. 100 caracteres):", key="image_description")
+    if st.button("Gerar Imagem", key="generate_image_button"):
         with st.spinner("Gerando imagem..."):
             try:
-                image = generate_image(description)  # Chama a função do módulo `image_gen`
+                image = generate_image(description)
                 st.image(image, caption="Imagem gerada", use_column_width=True)
             except Exception as e:
                 st.error(f"Erro ao gerar imagem: {e}")
-
-# Se nenhuma opção for selecionada, exibe uma mensagem padrão.
-else:
-    st.write("Escolha uma funcionalidade para começar.")

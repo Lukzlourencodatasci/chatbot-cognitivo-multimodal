@@ -19,43 +19,36 @@ def generate_image(description: str) -> Image:
     
     result = pipe(description).images[0]
     return result'''
-
 from diffusers import StableDiffusionPipeline, EulerDiscreteScheduler
 from PIL import Image
 import torch
 
-# Configuração do modelo para otimização de desempenho
+# Configuração do modelo
 model_id = "CompVis/stable-diffusion-v1-4"
-
-# Usando o agendador EulerDiscreteScheduler (opcional para maior desempenho)
 scheduler = EulerDiscreteScheduler.from_pretrained(model_id, subfolder="scheduler")
-
-# Carregar o modelo com otimizações, ajustado para CPU
 pipe = StableDiffusionPipeline.from_pretrained(
     model_id,
     scheduler=scheduler,
-    torch_dtype=torch.float32  # Mantém a precisão padrão para CPU
+    torch_dtype=torch.float32
 ).to("cpu")  # Força o uso da CPU
 
-# Não é necessário dividir a atenção na CPU, mas mantemos para consistência
 pipe.enable_attention_slicing()
 
-def generate_image(description: str) -> Image:
+def generate_image(description: str, num_inference_steps=20) -> Image:
     """
     Gera uma imagem com base em uma descrição textual.
 
     Args:
-        description (str): Descrição da imagem a ser gerada.
+        description (str): Descrição da imagem.
+        num_inference_steps (int): Passos de inferência.
 
     Returns:
         Image: Objeto PIL contendo a imagem gerada.
     """
     if not description.strip():
         raise ValueError("A descrição não pode estar vazia.")
+    if len(description) > 100:
+        description = description[:100]
 
-    # Ajuste o número de passos de inferência, caso necessário
-    num_inference_steps = 30
-
-    # Gerar a imagem com o prompt fornecido
     result = pipe(description, num_inference_steps=num_inference_steps).images[0]
     return result
